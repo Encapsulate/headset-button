@@ -1,0 +1,16 @@
+[Unit]
+Description=Headset button bridge (AVRCP target -> configurable action)
+Documentation=https://github.com/Encapsulate/headset-button
+After=bluetooth.service
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/headset-button-bridge
+Restart=always
+RestartSec=2
+# The bridge only talks D-Bus; give it a clean, predictable environment.
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=default.target

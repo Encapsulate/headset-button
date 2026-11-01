@@ -1,0 +1,14 @@
+[Unit]
+Description=Headset button tray indicator
+Documentation=https://github.com/Encapsulate/headset-button
+After=graphical-session.target headset-button.service
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/headset-button-tray
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=graphical-session.target

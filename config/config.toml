@@ -1,0 +1,29 @@
+# headset-button configuration
+#
+# The bridge re-reads this file on every button press, so edits take effect
+# immediately - no restart, no logout. The tray icon writes to it for you.
+
+# What the headset's centre / multifunction button does.
+#
+#   "mic-toggle"  mute or unmute the microphone        <- default
+#   "media"       classic behaviour: play / pause the active player
+#   "both"        toggle the mic AND forward play / pause
+#   "command"     run `command` below
+#   "play" "pause" "playpause" "stop" "next" "previous"
+#                 forward that one specific command to the active player
+action = "mic-toggle"
+
+# Which source to mute when action is "mic-toggle" or "both".
+#
+#   "default"          whatever the system default input is right now
+#   "bluez"            the Bluetooth headset (substring match)
+#   "<full source name>"  an exact/substring match, e.g.
+#                      "alsa_input.pci-0000_04_00.6.analog-stereo"
+mic = "default"
+
+# Shell command used when action = "command". Run through $SHELL -c style
+# splitting, so quoting works:  command = "playerctl play-pause"
+command = ""
+
+# Show a desktop notification when the microphone is muted / unmuted.
+notify = true
