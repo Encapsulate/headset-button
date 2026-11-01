@@ -35,6 +35,16 @@ No patching BlueZ. No root. No compiling. One small daemon, one tray icon, and
 a config file that is re-read on every single press — so switching between
 "mute me" and "pause the music" is one click, effective immediately.
 
+> **Built for one specific headset.** This project exists because of a $20 pair
+> of **onn. Wireless Earphones** ([Walmart 616108422](https://www.walmart.com/ip/New-onn-Wireless-Earphones-7-Hours-Playtime-Black-New/616108422)),
+> whose centre button only ever paused the music. Everything here was developed
+> and verified against that device — see
+> **[docs/REFERENCE-HEADSET.md](docs/REFERENCE-HEADSET.md)** for its full
+> capability dump. **It should work with any headset that speaks AVRCP**; if
+> yours sends HID keycodes instead, see
+> **[docs/OTHER-HEADSETS.md](docs/OTHER-HEADSETS.md)** for the 30-second check
+> and the kernel-side alternative.
+
 ---
 
 ## Contents
@@ -42,6 +52,8 @@ a config file that is re-read on every single press — so switching between
 - [Why this exists](#why-this-exists)
 - [Features](#features)
 - [Requirements](#requirements)
+- [Will it work with my headset?](#will-it-work-with-my-headset)
+- [Reference hardware](#reference-hardware)
 - [Install](#install)
 - [Using it](#using-it)
 - [Configuration](#configuration)
@@ -73,7 +85,9 @@ your choice of action behind the button.
 
 The original motivation was a headset with a useless hardware mute and a
 constant need to mute a microphone on calls — while *not* wanting to pause the
-music that was playing underneath.
+music that was playing underneath. The headset in question was a $20 pair of
+[onn. earbuds](docs/REFERENCE-HEADSET.md); the project is documented against
+them, and written to work with any AVRCP headset.
 
 ## Features
 
@@ -117,6 +131,58 @@ sudo apt install python3-dbus python3-gi gir1.2-gtk-3.0 \
 ```
 
 `install.sh` checks all of this for you and tells you exactly what is missing.
+
+## Will it work with my headset?
+
+Probably — but check first, it takes thirty seconds.
+
+This project intercepts **AVRCP**, the standard protocol a headset uses to send
+play/pause to a phone or laptop. Most headsets with a centre button use it. A
+minority — including nearly all wired USB-C/3.5 mm headsets, and some cheap
+Bluetooth ones — send ordinary **HID keyboard codes** instead. Those never
+reach BlueZ's AVRCP code, so this project cannot see them.
+
+```bash
+sudo dbus-monitor --system "interface='org.bluez.MediaPlayer1'"
+#   press the button
+#   member=Play / Pause / PlayPause scrolls past  -> AVRCP: this project works
+```
+
+```bash
+sudo libinput debug-events --show-keycodes
+#   press the button
+#   KEY_PLAYPAUSE appears                        -> HID: use a kernel remap
+```
+
+Or just check what the device claims to be:
+
+```bash
+bluetoothctl info <MAC> | grep -iE "icon|uuid"
+#   Icon: audio-headset + "A/V Remote Control" UUID  -> AVRCP, this project
+#   Icon: input-keyboard                            -> HID, kernel remap
+```
+
+Full decision tree, the HID workarounds (hwdb rule, `input-remapper`, an
+`evdev` grabber) and the special cases — multipoint, hardware mute buttons,
+2.4 GHz dongles, phone-first headsets — are in
+**[docs/OTHER-HEADSETS.md](docs/OTHER-HEADSETS.md)**.
+
+## Reference hardware
+
+Developed and verified against a **onn. Wireless Earphones (Black)**,
+[Walmart item 616108422](https://www.walmart.com/ip/New-onn-Wireless-Earphones-7-Hours-Playtime-Black-New/616108422)
+— a ~$20 pair of true-wireless earbuds. It reports `onn In-Ear`, advertises
+`A/V Remote Control Target` (`0x110c`), and its button sends AVRCP `PLAYPAUSE`,
+which stock BlueZ handed straight to `mpris-proxy`.
+
+Verified environment: Ubuntu 26.04, kernel 7.0.0-38, BlueZ 5.85, PipeWire,
+GNOME on Wayland, onboard `hci0`.
+
+[docs/REFERENCE-HEADSET.md](docs/REFERENCE-HEADSET.md) has the full capability
+dump — SDP UUIDs, device class, codecs and profiles, observed button behaviour,
+the working config, and an honest list of what was *not* tested. It doubles as
+a known-good baseline: if your headset looks nothing like it, start with the
+section above.
 
 ## Install
 
@@ -337,7 +403,11 @@ Known-good: Ubuntu 24.04 and 26.04, GNOME, X11 and Wayland.
 ```
 bin/                    launchers (also usable straight from a checkout)
 config/config.toml      commented sample config
-docs/                   architecture and troubleshooting
+docs/                   architecture, portability and troubleshooting
+  HOW-IT-WORKS.md       the BlueZ/D-Bus mechanism in detail
+  REFERENCE-HEADSET.md  the exact headset this was built for
+  OTHER-HEADSETS.md     will it work with yours? what to do if not
+  TROUBLESHOOTING.md    symptom -> cause -> fix
 src/headset_button/     the package
   bridge.py             AVRCP target player + action dispatch
   tray.py               top-bar indicator
@@ -391,9 +461,17 @@ escape hatch.
 The cue: rising = live, falling = muted. `headset-button sound` replays both.
 
 **What if the headset sends HID keycodes instead of AVRCP?**
-Then BlueZ never sees the press and this tool cannot help; see the
-troubleshooting guide for the `libinput debug-events` check and the kernel-side
-alternative.
+Then BlueZ never sees the press and this tool cannot help; see
+[docs/OTHER-HEADSETS.md](docs/OTHER-HEADSETS.md) for the `libinput
+debug-events` check and the kernel-side alternative.
+
+**Has this been tested on more than one headset?**
+Honestly, no — one pair, documented exhaustively in
+[docs/REFERENCE-HEADSET.md](docs/REFERENCE-HEADSET.md). The mechanism it relies
+on is a standard BlueZ code path, so AVRCP headsets should behave alike, but
+that is an expectation rather than a measurement. Issue reports for other
+models are welcome; there is a template in
+[docs/OTHER-HEADSETS.md](docs/OTHER-HEADSETS.md).
 
 ## License
 

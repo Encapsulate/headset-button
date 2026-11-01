@@ -143,7 +143,10 @@ call returns, so what you hear always describes the state you are now in.
 * **The headset must actually speak AVRCP.** Cheap headsets sometimes send HID
   consumer-control codes over the HID profile instead; those never reach BlueZ
   AVRCP and need a completely different fix (an `evdev`/`hwdb` remap). Check
-  with `headset-button doctor` plus `journalctl --user -fu headset-button`.
+  with `headset-button doctor` plus `journalctl --user -fu headset-button`, and
+  see [OTHER-HEADSETS.md](OTHER-HEADSETS.md) for the decision tree. The device
+  this was verified on, and its full capability dump, is in
+  [REFERENCE-HEADSET.md](REFERENCE-HEADSET.md).
 * **Double and triple clicks are not distinguishable.** AVRCP has no notion of
   click count; a double click arrives as two `PlayPause` calls a few hundred
   milliseconds apart. Timing-based detection is possible but fragile.

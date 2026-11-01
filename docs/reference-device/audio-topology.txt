@@ -1,0 +1,58 @@
+# pactl list cards  (bluez card only)   (reference device)
+	Name: bluez_card.4C_FE_2E_8F_8D_8A
+	Driver: module-bluez5-device.c
+	Owner Module: n/a
+	Properties:
+		device.api = "bluez5"
+		device.bus = "bluetooth"
+		media.class = "Audio/Device"
+		device.name = "bluez_card.4C_FE_2E_8F_8D_8A"
+		device.description = "onn In-Ear"
+		device.alias = "onn In-Ear"
+		device.vendor.id = "bluetooth:05d6"
+		device.product.id = "0x000a"
+		device.form_factor = "headset"
+		device.icon_name = "audio-headset-bluetooth"
+		device.string = "4C:FE:2E:8F:8D:8A"
+		api.bluez5.icon = "audio-headset"
+		api.bluez5.path = "/org/bluez/hci0/dev_4C_FE_2E_8F_8D_8A"
+		api.bluez5.address = "4C:FE:2E:8F:8D:8A"
+		api.bluez5.device = ""
+		api.bluez5.class = "0x240404"
+		api.bluez5.connection = "connected"
+		bluez5.profile = "off"
+		spa.object.id = "224"
+		factory.id = "15"
+		client.id = "38"
+		object.id = "107"
+		object.serial = "1696"
+	Profiles:
+		off: Off (sinks: 0, sources: 0, priority: 0, available: yes)
+		a2dp-sink: High Fidelity Playback (A2DP Sink, codec SBC) (sinks: 1, sources: 0, priority: 132, available: yes)
+		a2dp-sink-sbc_xq: High Fidelity Playback (A2DP Sink, codec SBC-XQ) (sinks: 1, sources: 0, priority: 131, available: yes)
+		headset-head-unit-cvsd: Headset Head Unit (HSP/HFP, codec CVSD) (sinks: 1, sources: 1, priority: 4, available: yes)
+		headset-head-unit: Headset Head Unit (HSP/HFP, codec MSBC) (sinks: 1, sources: 1, priority: 5, available: yes)
+	Active Profile: a2dp-sink
+	Ports:
+		headset-input: Handsfree (type: Headset, priority: 0, latency offset: 0 usec, available)
+			Properties:
+				port.type = "headset"
+			Part of profile(s): headset-head-unit-cvsd, headset-head-unit
+		headset-output: Headphones (type: Headset, priority: 0, latency offset: 0 usec, available)
+			Properties:
+				port.type = "headset"
+				device.icon_name = "audio-headphones-bluetooth"
+			Part of profile(s): a2dp-sink, a2dp-sink-sbc_xq
+		headset-hf-output: Handsfree (type: Headset, priority: 0, latency offset: 0 usec, available)
+			Properties:
+				port.type = "headset"
+				device.icon_name = "audio-headset-bluetooth"
+			Part of profile(s): headset-head-unit-cvsd, headset-head-unit
+
+# pactl list short sinks / sources
+56	alsa_output.pci-0000_04_00.6.analog-stereo	PipeWire	s32le 2ch 48000Hz	SUSPENDED
+1703	bluez_output.4C:FE:2E:8F:8D:8A	PipeWire	float32le 2ch 48000Hz	RUNNING
+56	alsa_output.pci-0000_04_00.6.analog-stereo.monitor	PipeWire	s32le 2ch 48000Hz	SUSPENDED
+57	alsa_input.pci-0000_04_00.6.analog-stereo	PipeWire	s32le 2ch 48000Hz	RUNNING
+1700	bluez_input.4C:FE:2E:8F:8D:8A	PipeWire	float32le 1ch 48000Hz	SUSPENDED
+1703	bluez_output.4C:FE:2E:8F:8D:8A.monitor	PipeWire	float32le 2ch 48000Hz	RUNNING

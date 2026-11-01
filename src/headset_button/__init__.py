@@ -9,7 +9,7 @@ microphone, control playback, both, or run a command.
 See ``docs/HOW-IT-WORKS.md`` for the full mechanism.
 """
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 __all__ = ["__version__"]
 
 APP_NAME = "headset-button"

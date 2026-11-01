@@ -4,6 +4,23 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-11-01
+
+### Added
+- **docs/REFERENCE-HEADSET.md** — the exact headset this was built for (onn.
+  Wireless Earphones, Walmart 616108422): full SDP UUID dump, device class,
+  modalias, codecs and profiles, observed button behaviour, the working
+  config, and an explicit list of what was *not* tested.
+- **docs/OTHER-HEADSETS.md** — portability guide: a thirty-second test to tell
+  whether a headset speaks AVRCP or HID, what to change for AVRCP devices,
+  and the kernel-side workarounds (hwdb, `input-remapper`, `evdev`) for HID,
+  dongle and wired headsets. Includes a device-report template.
+- README sections "Will it work with my headset?" and "Reference hardware".
+
+### Changed
+- Documented that the reference earbuds' microphone only exists in the HFP/HSP
+  profile, so `mic = "bluez"` implies a codec downgrade.
+
 ## [1.1.0] - 2026-11-01
 
 ### Added

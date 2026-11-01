@@ -1,0 +1,10 @@
+# verified environment (captured over ssh, so session vars read tty/unknown)
+os:            Ubuntu 26.04 LTS
+kernel:        7.0.0-38-generic
+architecture:  x86_64
+bluetoothd:    5.85
+pipewire:      1.6.2
+wireplumber:   wireplumber
+adapter:       hci0: Type: Primary Bus: USB
+adapter bus:    BD Address: C0:35:32:9C:A5:DA ACL MTU: 1021:6 SCO MTU: 255:12
+gnome shell:   GNOME Shell 50.1
