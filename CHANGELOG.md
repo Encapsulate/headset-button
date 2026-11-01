@@ -4,6 +4,22 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-11-01
+
+### Added
+- **Audible mute / unmute cue.** A short rising two-note tone means the
+  microphone went live; a falling one means it is muted — so you can tell which
+  way it went without looking at the screen. Synthesised at runtime, so there
+  is no sound-theme dependency; `sound_mute` / `sound_unmute` replace either
+  cue with your own file.
+- `sound`, `sound_volume`, `sound_sink`, `sound_mute`, `sound_unmute` config
+  keys. The cue is emitted on the default output (or a substring-matched sink)
+  at a configurable volume.
+- Tray: **Sound cue on change** toggle and **Preview sound cue**.
+- CLI: `headset-button sound [mute|unmute|both]`; `status` reports the cue
+  state and `doctor` checks for a usable player.
+- Tests for cue generation, caching, sink resolution and playback argv.
+
 ## [1.0.0] - 2026-11-01
 
 First release. Extracted from a working one-off setup into a portable tool.

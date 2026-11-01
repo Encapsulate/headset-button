@@ -105,6 +105,21 @@ say "installing config -> $APPDIR/config.toml"
 install -d "$APPDIR"
 if [ -f "$APPDIR/config.toml" ]; then
     echo "    keeping your existing config"
+    if ! grep -q '^sound' "$APPDIR/config.toml"; then
+        echo "    adding the sound-cue settings (new in 1.1.0)"
+        cat >> "$APPDIR/config.toml" <<'EOF'
+
+# Audible cue when the microphone is muted / unmuted, so you can tell which
+# way it went without looking at the screen.
+#   unmute / live -> rising two-note cue
+#   mute          -> falling two-note cue
+sound = true
+sound_volume = 0.5
+sound_sink = "default"
+sound_mute = ""
+sound_unmute = ""
+EOF
+    fi
 else
     install -m 0644 "$REPO_DIR/config/config.toml" "$APPDIR/config.toml"
 fi

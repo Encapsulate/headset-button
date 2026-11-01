@@ -122,6 +122,31 @@ busctl --user call org.headsetbutton.Bridge /org/headsetbutton/control \
        org.headsetbutton.Control1 Press s PlayPause
 ```
 
+## No sound cue, or the cue is too quiet
+
+```bash
+headset-button status        # "sound cue off" / "(no player found!)"
+headset-button sound         # play both cues
+```
+
+* Turned off → `headset-button set sound true`, or tick **Sound cue on
+  change** in the tray.
+* `no player found` → install one: `sudo apt install pulseaudio-utils`
+  (`paplay`), or `pipewire-bin` (`pw-play`), or `alsa-utils` (`aplay`).
+* Too quiet → `headset-button set sound_volume 0.9`.
+* Coming out of the wrong device → `headset-button set sound_sink bluez`
+  (substring match), or `headset-button set sound_sink default`.
+* Silent only while the headset is in a call → the headset may hold the link
+  in a narrow-band mode; `headset-button set sound_sink alsa_output...` pins
+  the cue to the built-in speakers instead.
+
+If you replaced the tones and hear nothing, check the paths:
+
+```bash
+headset-button status        # flags missing sound_mute / sound_unmute files
+headset-button set sound_mute ""
+```
+
 ## The headset's own mute button and mine disagree
 
 Many headsets have a separate hardware mute that the OS never learns about.

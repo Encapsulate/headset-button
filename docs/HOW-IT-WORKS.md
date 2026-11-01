@@ -105,6 +105,27 @@ PipeWire/PulseAudio graph. The `mic` setting is resolved as:
   (`bluez` is the usual choice for the headset itself),
 * no match → the system default.
 
+## The sound cue
+
+Muting is invisible, so `sound.py` gives the state change an audible shape:
+a **rising** interval for live, a **falling** one for muted. Direction carries
+the meaning, so there is nothing to memorise.
+
+The cue is *synthesised*, not borrowed from a sound theme:
+
+* `_render()` writes 16-bit mono PCM at 44.1 kHz — two sine notes with a 6 ms
+  fade in/out so there is no click, separated by a 35 ms gap.
+* `_wav_file()` caches the result in `$XDG_RUNTIME_DIR/headset-button/`,
+  keyed by cue and volume, and writes it atomically. Regeneration is free and
+  the cache survives for the session.
+* `play()` picks the first available player (`paplay`, `pw-play`, `aplay`,
+  `ffplay`), resolves `sound_sink` against `pactl list short sinks`, and
+  spawns it without blocking the D-Bus callback.
+
+`sound_mute` / `sound_unmute` swap in your own files; a missing file falls
+back to the tone rather than failing silently. The cue plays *after* the mute
+call returns, so what you hear always describes the state you are now in.
+
 ## Files
 
 | Path | Purpose |
@@ -113,6 +134,7 @@ PipeWire/PulseAudio graph. The `mic` setting is resolved as:
 | `src/headset_button/tray.py` | Gtk3/AppIndicator top-bar menu. Writes config; no IPC. |
 | `src/headset_button/cli.py` | `headset-button` subcommands, including `doctor`. |
 | `src/headset_button/audio.py` | `pactl`/`wpctl` shim. |
+| `src/headset_button/sound.py` | Synthesises and plays the mute / unmute cue. |
 | `src/headset_button/config.py` | Comment-preserving, atomic config edits. |
 | `systemd/*.service` | Two user units: bridge (always) and tray (graphical session). |
 

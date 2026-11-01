@@ -9,11 +9,12 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 
 from . import (ACTION_LABELS, ALL_ACTIONS, BRIDGE_UNIT, CONTROL_IFACE,
                CONTROL_NAME, CONTROL_PATH, MPRIS_PROXY_UNIT, TRAY_UNIT,
                __version__)
-from . import audio, config
+from . import audio, config, sound
 
 OK = "\033[32m✔\033[0m"
 BAD = "\033[31m✘\033[0m"
@@ -61,6 +62,9 @@ def cmd_status(_args) -> int:
     print("mic state     %s"
           % ("muted" if muted else "live" if muted is False else "unknown"))
     print("audio backend %s" % (audio.backend() or "none found"))
+    print("sound cue     %s%s"
+          % ("on" if cfg.get("sound", True) else "off",
+             "" if sound.player() else "  (no player found!)"))
     print("bridge unit   %s" % _unit_state(BRIDGE_UNIT))
     print("tray unit     %s" % _unit_state(TRAY_UNIT))
     print("mpris-proxy   %s"
@@ -122,6 +126,32 @@ def cmd_mic(args) -> int:
     if result is None:
         return _fail("no working audio backend (need pactl or wpctl)")
     print("muted" if result else "live")
+    return 0
+
+
+def cmd_sound(args) -> int:
+    cfg = config.load()
+    volume = float(cfg.get("sound_volume", 0.5) or 0.5)
+    sink = str(cfg.get("sound_sink", "default"))
+
+    def fire(muted: bool) -> bool:
+        return sound.play(muted, volume=volume, sink=sink,
+                          custom=str(cfg.get("sound_mute" if muted
+                                             else "sound_unmute", "")))
+
+    if args.what == "mute":
+        ok = fire(True)
+    elif args.what == "unmute":
+        ok = fire(False)
+    else:
+        ok = fire(False)
+        if ok:
+            time.sleep(0.7)
+            ok = fire(True)
+    if not ok:
+        return _fail("no audio player found (need paplay, pw-play, aplay "
+                     "or ffplay)")
+    print("played %s cue" % args.what)
     return 0
 
 
@@ -189,6 +219,8 @@ def cmd_doctor(_args) -> int:
 
     backend = audio.backend()
     check("audio backend", backend is not None, "need pactl or wpctl")
+    check("sound cue player", sound.player() is not None,
+          "apt install pulseaudio-utils (paplay)", fatal=False)
 
     check("bluetooth service active",
           subprocess.run(["systemctl", "is-active", "--quiet", "bluetooth"],
@@ -262,6 +294,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("what", nargs="?", default="status",
                    choices=["toggle", "mute", "unmute", "status"])
     p.set_defaults(func=cmd_mic)
+
+    p = subs.add_parser("sound", help="play the mute / unmute cue")
+    p.add_argument("what", nargs="?", default="both",
+                   choices=["mute", "unmute", "both"])
+    p.set_defaults(func=cmd_sound)
 
     p = subs.add_parser("simulate", help="pretend the button was pressed")
     p.add_argument("command", nargs="?", default="PlayPause",

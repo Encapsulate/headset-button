@@ -28,7 +28,7 @@ for namespace in ("AyatanaAppIndicator3", "AppIndicator3"):
 
 from . import (ACTION_LABELS, APP_ID, APP_NAME, BRIDGE_UNIT, TRAY_ACTIONS,
                TRAY_UNIT)  # noqa: E402
-from . import audio, config  # noqa: E402
+from . import audio, config, sound  # noqa: E402
 
 SYNC_SECONDS = 3
 
@@ -123,6 +123,15 @@ class Tray:
         self.notify_item.connect("toggled", self._on_notify)
         self.menu.append(self.notify_item)
 
+        self.sound_item = Gtk.CheckMenuItem(label="Sound cue on change")
+        self.sound_item.set_active(bool(cfg.get("sound", True)))
+        self.sound_item.connect("toggled", self._on_sound)
+        self.menu.append(self.sound_item)
+
+        preview = Gtk.MenuItem(label="Preview sound cue")
+        preview.connect("activate", lambda *_: self._preview_sound())
+        self.menu.append(preview)
+
         self.menu.append(Gtk.SeparatorMenuItem())
 
         test = Gtk.MenuItem(label="Test: press the button")
@@ -159,6 +168,26 @@ class Tray:
         if self.building:
             return
         config.save_key("notify", "true" if item.get_active() else "false")
+
+    def _on_sound(self, item: Gtk.CheckMenuItem) -> None:
+        if self.building:
+            return
+        config.save_key("sound", "true" if item.get_active() else "false")
+        if item.get_active():
+            self._cue(False)
+
+    def _cue(self, muted: bool) -> None:
+        cfg = config.load()
+        sound.play(muted,
+                   volume=float(cfg.get("sound_volume", 0.5) or 0.5),
+                   sink=str(cfg.get("sound_sink", "default")),
+                   custom=str(cfg.get("sound_mute" if muted else "sound_unmute",
+                                      "")))
+
+    def _preview_sound(self) -> None:
+        """Rising cue first, falling cue half a second later."""
+        self._cue(False)
+        GLib.timeout_add(600, lambda: (self._cue(True), False)[1])
 
     def _on_command(self, *_args) -> None:
         current = config.load().get("command", "")
@@ -245,6 +274,14 @@ class Tray:
             self.building = True
             try:
                 self.notify_item.set_active(notify)
+            finally:
+                self.building = False
+
+        cue = bool(cfg.get("sound", True))
+        if self.sound_item.get_active() != cue:
+            self.building = True
+            try:
+                self.sound_item.set_active(cue)
             finally:
                 self.building = False
 

@@ -20,6 +20,8 @@ top-bar icon so you can change your mind mid-call.
   ├──────────────────────────────────┤
   │ Microphone source           ▸    │
   │ ☑ Notify on change               │
+  │ ☑ Sound cue on change            │
+  │ Preview sound cue                │
   ├──────────────────────────────────┤
   │ Test: press the button           │
   │ Restart bridge                   │
@@ -90,6 +92,9 @@ music that was playing underneath.
 - **Playback state stays honest.** The bridge mirrors the real player's
   `PlaybackStatus`, so the headset's own indicator is not lied to.
 - **Optional notification** on mute/unmute.
+- **Audible cue.** A rising two-note tone for live, a falling one for muted —
+  so you can tell which way it went without looking at the screen. Toggle it
+  from the tray or the CLI; supply your own sound files if you prefer.
 - **`headset-button doctor`** — one command that checks every dependency, unit
   and setting and prints the fix for whatever is broken.
 - **Fully reversible install.** `uninstall.sh` puts `mpris-proxy` back exactly
@@ -164,6 +169,8 @@ headset-button set action both           # mic + play/pause together
 headset-button set action next           # skip track instead
 headset-button set mic bluez             # pin to the headset's microphone
 headset-button set notify false          # silence the popups
+headset-button set sound false           # silence the cue
+headset-button sound                     # play both cues right now
 headset-button mic toggle                # toggle the mic right now
 headset-button mic status                # muted / live
 headset-button simulate                  # fake a button press
@@ -202,6 +209,13 @@ command = ""
 
 # Desktop notification on mute/unmute.
 notify = true
+
+# Audible cue on mute/unmute: rising = live, falling = muted.
+sound = true
+sound_volume = 0.5
+sound_sink = "default"
+sound_mute = ""          # optional: your own file instead of the tone
+sound_unmute = ""        # optional: your own file instead of the tone
 ```
 
 Edits apply on the next press. Malformed files fall back to defaults rather
@@ -233,6 +247,29 @@ headset-button set mic alsa_input.pci-0000_04_00.6.analog-stereo
 ```
 
 The tray's **Microphone source** submenu does the same thing by clicking.
+
+## Knowing which way it went
+
+Muting is invisible, so the bridge tells you audibly: a **rising** two-note cue
+means the microphone is now **live**, a **falling** one means it is **muted**.
+The interval direction is the message, so you never have to remember which
+sound means what, and you never have to look at the screen.
+
+The tones are synthesised at runtime into `$XDG_RUNTIME_DIR/headset-button/` —
+no sound theme, no extra packages, identical on every distro. They play on the
+current default output, which is normally the headset itself.
+
+```bash
+headset-button sound              # hear both cues
+headset-button set sound false    # turn the cue off
+headset-button set sound_volume 0.8
+headset-button set sound_sink bluez        # force it out of the headset
+headset-button set sound_mute ~/beep-down.oga   # your own files
+headset-button set sound_unmute ~/beep-up.oga
+```
+
+`sound_sink` follows the default output by default, so if you switch from the
+headset to speakers the cue follows you.
 
 ## How it works
 
@@ -306,6 +343,7 @@ src/headset_button/     the package
   tray.py               top-bar indicator
   cli.py                command line
   audio.py              pactl/wpctl shim
+  sound.py              synthesised mute / unmute cue
   config.py             atomic, comment-preserving config edits
 systemd/                user units
 tests/                  unit tests
@@ -348,6 +386,9 @@ button; the hardware mute keeps working independently.
 Not reliably. AVRCP has no click counter — a double click is just two
 `PlayPause` calls. `action = "command"` plus your own timing logic is the
 escape hatch.
+
+**How do I know if I muted or unmuted?**
+The cue: rising = live, falling = muted. `headset-button sound` replays both.
 
 **What if the headset sends HID keycodes instead of AVRCP?**
 Then BlueZ never sees the press and this tool cannot help; see the

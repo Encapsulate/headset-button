@@ -54,6 +54,18 @@ def problems(cfg: dict) -> list[str]:
         issues.append("action is 'command' but command is empty")
     if not isinstance(cfg.get("notify", True), bool):
         issues.append("notify must be true or false")
+    if not isinstance(cfg.get("sound", True), bool):
+        issues.append("sound must be true or false")
+    try:
+        volume = float(cfg.get("sound_volume", 0.5))
+        if not 0.0 <= volume <= 1.0:
+            issues.append("sound_volume must be between 0.0 and 1.0")
+    except (TypeError, ValueError):
+        issues.append("sound_volume must be a number between 0.0 and 1.0")
+    for key in ("sound_mute", "sound_unmute"):
+        value = str(cfg.get(key, "")).strip()
+        if value and not os.path.isfile(os.path.expanduser(value)):
+            issues.append("%s points at a missing file: %s" % (key, value))
     return issues
 
 

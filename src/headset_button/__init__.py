@@ -9,7 +9,7 @@ microphone, control playback, both, or run a command.
 See ``docs/HOW-IT-WORKS.md`` for the full mechanism.
 """
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 __all__ = ["__version__"]
 
 APP_NAME = "headset-button"
@@ -76,4 +76,9 @@ DEFAULTS = {
     "mic": "default",
     "command": "",
     "notify": True,
+    "sound": True,
+    "sound_volume": 0.5,
+    "sound_sink": "default",
+    "sound_mute": "",
+    "sound_unmute": "",
 }

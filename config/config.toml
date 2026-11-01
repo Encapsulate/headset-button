@@ -27,3 +27,23 @@ command = ""
 
 # Show a desktop notification when the microphone is muted / unmuted.
 notify = true
+
+# Play a short audible cue when the microphone is muted / unmuted, so you can
+# tell which way it went without looking at the screen.
+#
+#   unmute / live  ->  rising two-note cue
+#   mute           ->  falling two-note cue
+sound = true
+
+# Cue loudness, 0.0 - 1.0.
+sound_volume = 0.5
+
+# Which output the cue plays through.
+#   "default"  the current default output (usually the headset)  <- default
+#   "bluez"    substring match, e.g. the headset by name
+sound_sink = "default"
+
+# Optional: replace the synthesised tones with your own files.
+# Leave empty to use the built-in cues.
+sound_mute = ""
+sound_unmute = ""

@@ -26,7 +26,7 @@ from gi.repository import GLib
 from . import (APP_ID, BLUEZ_BUS, CONTROL_IFACE, CONTROL_NAME, CONTROL_PATH,
                FORWARD_ACTIONS, MEDIA_IFACE, MIC_ACTIONS, MPRIS_IFACE,
                MPRIS_PATH, MPRIS_PREFIX, OM_IFACE, PLAYER_PATH, PROPS_IFACE)
-from . import audio, config
+from . import audio, config, sound
 
 
 def log(message: str) -> None:
@@ -287,6 +287,20 @@ class Bridge:
             log("could not toggle microphone (no pactl/wpctl?)")
             return
         log("microphone %s -> %s" % (source, "MUTED" if muted else "live"))
+
+        if cfg.get("sound", True):
+            custom = str(cfg.get("sound_mute" if muted else "sound_unmute", ""))
+            played = sound.play(
+                muted,
+                volume=float(cfg.get("sound_volume", 0.5) or 0.5),
+                sink=str(cfg.get("sound_sink", "default")),
+                custom=custom)
+            if played:
+                log("sound cue: %s" % ("falling (muted)" if muted
+                                       else "rising (live)"))
+            else:
+                log("no audio player found for the sound cue")
+
         if cfg.get("notify", True):
             _notify("Microphone", "Muted" if muted else "Live")
 
